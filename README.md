@@ -20,14 +20,14 @@ Habitify で毎日の通知と習慣チェック
 | 部品 | 場所 |
 |---|---|
 | クイズページ | https://claude.ai/artifact/JH2Rrt5K9W5unXMnRcYrF4 （ソース: `app/index.html`） |
-| 朝の準備タスク | claude.ai の定期実行タスク `trig_01BkEYjwhDajd2aKv6Fx6nX4`（指示: `routines/morning-prep.md`） |
+| 朝の準備タスク | claude.ai の定期実行タスク `trig_01BkEYjwhDajd2aKv6Fx6nX4`（指示書: `routines/morning-prep.md`。main の内容が実行時に使われる） |
 | テーマ管理 | Notion「学習テーマデータベース」（`docs/notion-schema.md`） |
 | 通知・習慣管理 | Habitify（Todoist は使わない） |
 
 ## ディレクトリ
 
 - `app/index.html` … クイズページのソース（アーティファクトの公開版のコピー）
-- `routines/` … 定期実行タスクの指示文とスケジュール等の設定
+- `routines/` … 定期実行タスクの指示書とスケジュール等の設定（main の内容が実行時に使われる）
 - `docs/data-model.md` … DB のコレクション構成、復習間隔、出題量のルール
 - `docs/notion-schema.md` … Notion 学習テーマDBのプロパティ
 
@@ -38,5 +38,6 @@ Habitify で毎日の通知と習慣チェック
 
 ## 運用メモ
 
-- このリポジトリは記録用で、変更しても本番には自動反映されない。ページを直したらアーティファクトを再公開し、指示を変えたら定期実行タスクも更新すること（逆に、本番を直したらここにも反映する）。
+- アプリ（`app/index.html`）は記録用のコピーで、変更しても本番には自動反映されない。ページを直したらアーティファクトを再公開すること（逆に、本番を直したらここにも反映する）。手順は `CLAUDE.md`。
+- 朝のタスクの指示書（`routines/morning-prep.md`）は、main に反映すれば次回の実行から効く。タスクのプロンプトは「main のこのファイルを読んで従う」だけの短い文で、指示書のパスや参照の仕方を変えるときだけ更新する。
 - 以前あった昼の再通知タスク（12:13 JST、Todoist のタスク完了・再設定）は、通知を Habitify に移した際に廃止済み。
