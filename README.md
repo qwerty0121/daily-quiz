@@ -33,7 +33,7 @@ Habitify で毎日の通知と習慣チェック
 
 ## アプリのファイル
 
-ビルドは不要（ブラウザの ES modules をそのまま読む）。ローカルで確認するときは `app/` を `python3 -m http.server` で配信する（`window.claude` がないので、データは読み込めず接続できない旨の画面になる）。
+ビルドは不要（ブラウザの ES modules をそのまま読む）。ローカルで確認するときは `app/` を `python3 -m http.server` で配信する。テストは `npm test`（E2E は Playwright を依存に入れておらず、見つからなければ skip する。クラウドセッションには導入済み）（`window.claude` がないので、データは読み込めず接続できない旨の画面になる）。
 
 | パス | 内容 |
 |---|---|
@@ -48,6 +48,7 @@ Habitify で毎日の通知と習慣チェック
 | `app/js/chat.js` | 問題についての質問（`sample`） |
 | `app/js/events.js` | クリック・送信のイベント登録 |
 | `app/js/data.js` | `db` / `sample` への接続と `onSnapshot` の購読 |
+| `test/*.test.mjs`、`test/support/` | `node:test` のテスト。`quiz.test.mjs`（復習間隔・出題の選び方）と `util.test.mjs`（日付・エスケープ）は DOM に依存しない処理を、`e2e.test.mjs` は Chromium（Playwright）で実際の画面を動かして、回答の書き込み・購読・画面・XSS を確かめる。`window.claude`（db・sample）は `test/support/harness.mjs` の偽物に差し替える。`npm test` で実行 |
 
 ## 管理しないもの
 
