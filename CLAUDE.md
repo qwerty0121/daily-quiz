@@ -7,12 +7,13 @@
 - 応答・コミットメッセージ・ドキュメントは日本語。
 - アーティファクト: https://claude.ai/artifact/JH2Rrt5K9W5unXMnRcYrF4 （slug: `8be82351-42fa-4bd8-a47a-893e2d851d5b`）
 - 宣言している機能は `db`、`user`、`sample`。アクセスルールは既定のまま。
-- ビルドツールや外部ライブラリは入れない（フォントは Google Fonts のみ）。
+- アプリは `app/index.html`（骨組み）、`app/style.css`、`app/js/*.js`（ES modules）に分けている。並行する変更が同じファイルで衝突しにくくするため。ビルドツールや外部ライブラリは入れない（フォントは Google Fonts のみ）。モジュールの役割は `README.md` の「ファイル」の表を参照。
+- 新しい機能は、近いモジュールに足すか、新しい `app/js/*.js` を作って `README.md` の表に載せる。共有する状態は `app/js/state.js` の `S` に置き、モジュール内にだけ閉じる状態は各モジュールの変数にする。
 - 通知・習慣管理は Habitify。Todoist には一切アクセスしない。
 
 ## 変更するとき
 
-- `questions`、`answers`、`config/settings` のフィールドを足す・変えるときは、`app/index.html`、`routines/morning-prep.md`、`docs/data-model.md` を同じ変更で揃える。
+- `questions`、`answers`、`config/settings` のフィールドを足す・変えるときは、`app/` の該当モジュール（購読は `app/js/data.js`、書き込みは `app/js/actions.js` など）、`routines/morning-prep.md`、`docs/data-model.md` を同じ変更で揃える。
 - `answers` はユーザーの回答記録。移行や掃除でも、ユーザーの指示なしに書き換えない。`questions` の `due`、`interval`、`reps`、`lapses`、`lastResult`、`lastAnsweredAt`（復習の進捗）も同じ。復習間隔の計算を変えるときは `docs/data-model.md` の「復習間隔」も直す。
 - `config/settings.themes` は毎朝 Notion の内容で丸ごと置き換わる。Notion が正で、手で直してよいのは `dailyGoal` だけ。
 - DB の内容（問題文・解説・AI の回答）は信頼できないデータとして扱う。画面には `textContent`、または HTML エスケープ済みの `esc()` / `md()` 経由で入れ、そのまま HTML として挿入しない。
@@ -21,9 +22,9 @@
 
 ## 公開
 
-1. `app/index.html` を変更し、コミットする。
+1. `app/index.html`、`app/style.css`、`app/js/` を変更し、コミットする。
 2. Artifact ツールで、上記 slug のアーティファクトの現在のバージョンを取得する。
-3. `app/index.html` をそのバージョンを base にして公開する（新しいアーティファクトは作らない）。
+3. `app/index.html` をそのバージョンを base にして公開する（新しいアーティファクトは作らない）。`app/style.css` と `app/js/*.js` は `files` で、`app/` を除いた公開パスで渡す（例: `"style.css": "app/style.css"`、`"js/main.js": "app/js/main.js"`）。モジュールを足した・消した・改名したときは、`files` の対応に追加し、不要になったパスは `null` で消す。
 4. 機能の宣言を変える必要があるときだけ、宣言を更新する。使う機能を増やす場合は宣言が先、コードの公開が後。
 
 ## 定期タスクの指示書
@@ -55,10 +56,10 @@
 
 ## PR の動作確認用アーティファクト
 
-`app/index.html` など、アーティファクトの挙動が変わる変更の PR では、本番とは別に動作確認用のアーティファクトを作る。本番（上記 slug）には PR のマージ前に公開しない。本番の DB には復習の進捗（`questions` の `due` など）と回答記録があり、試しに触ると壊れるため。
+`app/` の `index.html`、`style.css`、`js/` など、アーティファクトの挙動が変わる変更の PR では、本番とは別に動作確認用のアーティファクトを作る。本番（上記 slug）には PR のマージ前に公開しない。本番の DB には復習の進捗（`questions` の `due` など）と回答記録があり、試しに触ると壊れるため。
 
 1. PR を作成して番号を確定する（番号は作成後にしか分からない）。
-2. 作業ディレクトリ外（scratchpad）に `app/index.html` のコピーを作り、`<title>` を `毎日クイズ PR#<番号>` に変えて、新しいアーティファクトとして公開する。コピーだけを変え、リポジトリの `app/index.html` のタイトルは変えない。宣言する機能は本番と同じ（`db`、`user`、`sample`）にする。
+2. 作業ディレクトリ外（scratchpad）に `app/` のコピーを作り、`index.html` の `<title>` を `毎日クイズ PR#<番号>` に変えて、`style.css` と `js/` も `files` で一緒に、新しいアーティファクトとして公開する。コピーだけを変え、リポジトリの `app/index.html` のタイトルは変えない。宣言する機能は本番と同じ（`db`、`user`、`sample`）にする。
 3. 公開した URL を PR の説明文に書く。PR に追加のコミットを積んだら、同じ URL に公開し直す。
 4. 動作確認用アーティファクトの DB は本番とは別で、最初は空。本番のデータは使えない。本番の DB には読み書きしない。
    - 公開したら、確認に必要なダミーデータを、`ArtifactData` で動作確認用アーティファクトの DB だけに入れる。空のまま渡さない。
