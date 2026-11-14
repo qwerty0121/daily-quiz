@@ -49,6 +49,10 @@ Habitify で毎日の通知と習慣チェック
 | `app/js/events.js` | クリック・送信のイベント登録 |
 | `app/js/data.js` | `db` / `sample` への接続と `onSnapshot` の購読 |
 
+## CI
+
+`.github/workflows/ci.yml`（GitHub Actions）が、PR と `main` への push で `npm test` を実行する。`e2e.test.mjs` は CI では Playwright が無いので skip される（E2E はクラウドセッションやローカルで実行する）。
+
 ## 管理しないもの
 
 - テーマの中身 … Notion が正

@@ -9,7 +9,7 @@
 - 宣言している機能は `db`、`user`、`sample`。アクセスルールは既定のまま。
 - アプリは `app/index.html`（骨組み）、`app/style.css`、`app/js/*.js`（ES modules）に分けている。並行する変更が同じファイルで衝突しにくくするため。ビルドツールや外部ライブラリは入れない（フォントは Google Fonts のみ）。モジュールの役割は `README.md` の「ファイル」の表を参照。
 - 新しい機能は、近いモジュールに足すか、新しい `app/js/*.js` を作って `README.md` の表に載せる。共有する状態は `app/js/state.js` の `S` に置き、モジュール内にだけ閉じる状態は各モジュールの変数にする。
-- コミット前に `npm test` が通ること。テストは `test/*.test.mjs`（`node:test`、追加の依存なし。Node 22 以上）。`e2e.test.mjs` は導入済みの Playwright で動かし、見つからなければ skip する。画面や書き込みの挙動、復習間隔を変えたら、対応するテストを足す。
+- コミット前に `npm test` が通ること（CI（`.github/workflows/ci.yml`）も PR ごとに同じことを行う）。テストは `test/*.test.mjs`（`node:test`、追加の依存なし。Node 22 以上）。`e2e.test.mjs` は導入済みの Playwright で動かし、見つからなければ skip する。画面や書き込みの挙動、復習間隔を変えたら、対応するテストを足す。
 - 通知・習慣管理は Habitify。Todoist には一切アクセスしない。
 
 ## 変更するとき
