@@ -19,17 +19,35 @@ Habitify で毎日の通知と習慣チェック
 
 | 部品 | 場所 |
 |---|---|
-| クイズページ | https://claude.ai/artifact/JH2Rrt5K9W5unXMnRcYrF4 （ソース: `app/index.html`） |
+| クイズページ | https://claude.ai/artifact/JH2Rrt5K9W5unXMnRcYrF4 （ソース: `app/`） |
 | 朝の準備タスク | claude.ai の定期実行タスク `trig_01BkEYjwhDajd2aKv6Fx6nX4`（指示書: `routines/morning-prep.md`。main の内容が実行時に使われる） |
 | テーマ管理 | Notion「学習テーマデータベース」（`docs/notion-schema.md`） |
 | 通知・習慣管理 | Habitify（Todoist は使わない） |
 
 ## ディレクトリ
 
-- `app/index.html` … クイズページのソース（アーティファクトの公開版のコピー）
+- `app/` … クイズページのソース（アーティファクトの公開版のコピー）。ファイルの役割は下の表
 - `routines/` … 定期実行タスクの指示書とスケジュール等の設定（main の内容が実行時に使われる）
 - `docs/data-model.md` … DB のコレクション構成、復習間隔、出題量のルール
 - `docs/notion-schema.md` … Notion 学習テーマDBのプロパティ
+
+## アプリのファイル
+
+ビルドは不要（ブラウザの ES modules をそのまま読む）。ローカルで確認するときは `app/` を `python3 -m http.server` で配信する（`window.claude` がないので、データは読み込めず接続できない旨の画面になる）。
+
+| パス | 内容 |
+|---|---|
+| `app/index.html` | 画面の骨組み（HTML）。`style.css` と `js/main.js` を読み込む |
+| `app/style.css` | スタイル |
+| `app/js/main.js` | 入口。イベントを登録し、データ接続を始める |
+| `app/js/state.js` | 共有する状態（`S`）と定数、描画先の要素（`view`） |
+| `app/js/util.js` | 日付・HTML エスケープ・簡易 Markdown の道具（状態には触らない） |
+| `app/js/quiz.js` | 復習間隔の計算（`schedule`）、次に出す問題の選択、目標・有効テーマの取得 |
+| `app/js/render.js` | 「今日」「履歴」の描画、スナップショット更新時の再描画（`refresh`） |
+| `app/js/actions.js` | 回答、まぐれ・あやふやの切り替え、次の問題、問題のその場生成、履歴の展開 |
+| `app/js/chat.js` | 問題についての質問（`sample`） |
+| `app/js/events.js` | クリック・送信のイベント登録 |
+| `app/js/data.js` | `db` / `sample` への接続と `onSnapshot` の購読 |
 
 ## 管理しないもの
 
