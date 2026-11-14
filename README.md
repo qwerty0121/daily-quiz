@@ -50,6 +50,10 @@ Habitify で毎日の通知と習慣チェック
 | `app/js/data.js` | `db` / `sample` への接続と `onSnapshot` の購読 |
 | `test/*.test.mjs`、`test/support/` | `node:test` のテスト。`quiz.test.mjs`（復習間隔・出題の選び方）と `util.test.mjs`（日付・エスケープ）は DOM に依存しない処理を、`e2e.test.mjs` は Chromium（Playwright）で実際の画面を動かして、回答の書き込み・購読・画面・XSS を確かめる。`window.claude`（db・sample）は `test/support/harness.mjs` の偽物に差し替える。`npm test` で実行 |
 
+## CI
+
+`.github/workflows/ci.yml`（GitHub Actions）が、PR と `main` への push で `npm test` を実行する。`e2e.test.mjs` は CI では Playwright が無いので skip される（E2E はクラウドセッションやローカルで実行する）。
+
 ## 管理しないもの
 
 - テーマの中身 … Notion が正
