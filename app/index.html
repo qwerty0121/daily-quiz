@@ -108,6 +108,10 @@ h1{font-family:var(--display);font-weight:700;font-size:22px;margin:0;letter-spa
 .next-row .btn{width:100%;min-height:52px;font-size:16px}
 .note{font-size:13px;color:var(--muted)}
 .note.err{color:var(--ng)}
+.habit{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.habit.ok{color:var(--ok)} .habit.fail{color:var(--ng)}
+.habit .spin{flex:none;width:10px;height:10px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 
 .empty{text-align:center;padding:28px 18px;gap:10px;align-items:center}
 .empty .big{font-family:var(--display);font-weight:700;font-size:18px}
@@ -314,9 +318,9 @@ footer a{color:var(--accent)}
           <span class="verdict ${info.correct ? 'ok' : 'ng'}">${info.correct ? '正解' : '不正解'}</span>
           <span class="next-due">次の出題 <b>${info.sched.interval}</b> 日後</span>
         </div>
+        ${habitHtml(info)}
         ${unsureBtn ? `<div>${unsureBtn}</div>` : ''}
         <div class="explain"><h3>解説</h3><div class="md">${md(q.explanation)}</div></div>
-        ${info.habit === 'fail' ? '<div class="note">Habitify への記録に失敗しました（回答は保存済みです）。</div>' : ''}
         ${info.saveError ? '<div class="note err">回答の記録に失敗しました。通信状況を確認して、もう一度開き直してください。</div>' : ''}
         ${chatHtml(q)}
         <div class="actions next-row"><button class="btn" data-action="next" ${S.gen.busy ? 'disabled' : ''}>${S.gen.busy ? '問題を作っています…' : '次の問題 →'}</button></div>
@@ -399,13 +403,26 @@ footer a{color:var(--accent)}
   // Habitify の習慣「毎日クイズをやる」に、回答1問ごとに 1 rep を記録する（習慣側の目標が N なら N 問で達成）。
   // 二重計上を避けるため自動リトライはしない。失敗しても回答の記録には影響しない。
   const HABITIFY = { server: 'Habitify MCP', habitId: '-P5vNISNlgX1gjnZS5vC' };
+  function habitHtml(info) {
+    const h = info.habit;
+    if (h === 'pending') return '<div class="habit" role="status"><span class="spin"></span>Habitify に記録中…</div>';
+    if (h === 'ok') return '<div class="habit ok" role="status">✓ Habitify に記録しました</div>';
+    if (h === 'unavailable') return '<div class="habit" role="status">Habitify と連携できないため、記録していません（回答は保存済みです）</div>';
+    if (h && h.startsWith('fail')) {
+      const why = { needs_reauth: 'Habitify の再接続が必要です', server_not_connected: 'Habitify コネクタが未接続です', not_in_manifest: 'Habitify への接続が許可されていません', approval_required: '接続の承認が必要です', tool_error: 'Habitify がエラーを返しました' }[h.slice(5)] || '通信に失敗しました';
+      return `<div class="habit fail" role="status">× Habitify への記録に失敗（${esc(why)}。回答は保存済みです）</div>`;
+    }
+    return '';
+  }
   async function logHabit(info) {
-    if (!S.mcp) return;
+    const show = () => { if (S.tab === 'today' && S.info === info) renderToday(); };
+    if (!S.mcp) { info.habit = 'unavailable'; show(); return; }
+    info.habit = 'pending'; show();
     try {
       await S.mcp.callTool(HABITIFY.server, 'add-habit-log', { habitId: HABITIFY.habitId, value: 1, unit: 'rep', date: TODAY });
       info.habit = 'ok';
-    } catch (e) { info.habit = 'fail'; }
-    if (S.tab === 'today' && S.info === info) renderToday();
+    } catch (e) { info.habit = 'fail:' + (e && e.code || ''); }
+    show();
   }
   async function answer(idx) {
     const q = S.current; if (!q || S.info) return;
