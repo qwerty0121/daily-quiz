@@ -10,6 +10,7 @@
 | 項目 | 値 |
 |---|---|
 | 名前 | 毎日クイズの準備（朝） |
+| ID | trig_01QTDgPZDBvaFXgmLj7Yro4J（2026-11-22 に旧 trig_01BkEYjwhDajd2aKv6Fx6nX4 から切り替え。旧タスクは無効化済みで、本文を直接持つ形式） |
 | スケジュール | `CRON_TZ=Asia/Tokyo 47 6 * * *`（毎日 6:47 JST） |
 | モデル | claude-opus-5-5 |
 | リポジトリ | qwerty0121/daily-quiz |
