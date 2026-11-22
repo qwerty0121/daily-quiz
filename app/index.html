@@ -196,6 +196,8 @@ footer a{color:var(--accent)}
     let out = '';
     parts.forEach((p, i) => {
       if (i % 2 === 1) { out += '<pre><code>' + esc(p.replace(/\n$/, '')) + '</code></pre>'; return; }
+      // 改行のない長文（既存データ等）は、句点ごとに段落を分けて読みやすくする
+      if (!/\n/.test(p.trim()) && p.length > 60) p = p.replace(/。(?=[^\s」』）)])/g, '。\n\n');
       const blocks = esc(p).split(/\n{2,}/);
       for (const b of blocks) {
         const t = b.trim(); if (!t) continue;
@@ -488,7 +490,7 @@ ${recent.join('\n') || '（なし）'}
 - 形式は4択（choicesが4つ）か○×（choicesが ["○ 正しい", "× 誤り"]）のどちらか。4択を基本に、ときどき○×。
 - 正解は1つだけ。誤答の選択肢ももっともらしくする。
 - 問題文はスマホで読める長さ（200字以内目安）。コードを含める場合は短く、\`\`\`で囲む。
-- explanation は正解の理由と、誤答がなぜ違うかを300字以内で。
+- explanation は正解の理由と、誤答がなぜ違うかを300字以内で。読みやすいよう、「正解の理由」「誤答が違う理由」などの意味のまとまりごとに空行（\\n\\n）で段落を分け、誤答の説明は「- 」で始まる箇条書き（1行1項目）にする。
 - すべて日本語。
 
 次のJSONオブジェクトだけを返してください:
