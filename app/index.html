@@ -139,6 +139,8 @@ h1{font-family:var(--display);font-weight:700;font-size:22px;margin:0;letter-spa
 .row .detail{padding:0 12px 14px;display:flex;flex-direction:column;gap:12px}
 footer{font-size:12px;color:var(--muted);text-align:center}
 footer a{color:var(--accent)}
+.xlink{font-size:12px;color:var(--accent);text-decoration:none;white-space:nowrap}
+.xlink:hover{text-decoration:underline}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -146,6 +148,7 @@ footer a{color:var(--accent)}
   <header>
     <div class="toprow">
       <h1>毎日クイズ</h1>
+      <a class="xlink" href="https://claude.ai/artifact/Tdkucr42YskZ2xk7GShU3R" target="_blank" rel="noopener">CLF-C02 学習室 →</a>
       <div class="today-meta" id="meta"></div>
     </div>
     <div class="tabs" role="tablist">
@@ -177,6 +180,7 @@ footer a{color:var(--accent)}
     gen: { busy: false, error: null },
     chats: {}, chatBusy: false, chatCtl: null,
     range: 7, expanded: null, qcache: {},
+    mcp: null,
   };
 
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -312,6 +316,7 @@ footer a{color:var(--accent)}
         </div>
         ${unsureBtn ? `<div>${unsureBtn}</div>` : ''}
         <div class="explain"><h3>解説</h3><div class="md">${md(q.explanation)}</div></div>
+        ${info.habit === 'fail' ? '<div class="note">Habitify への記録に失敗しました（回答は保存済みです）。</div>' : ''}
         ${info.saveError ? '<div class="note err">回答の記録に失敗しました。通信状況を確認して、もう一度開き直してください。</div>' : ''}
         ${chatHtml(q)}
         <div class="actions next-row"><button class="btn" data-action="next" ${S.gen.busy ? 'disabled' : ''}>${S.gen.busy ? '問題を作っています…' : '次の問題 →'}</button></div>
@@ -391,6 +396,17 @@ footer a{color:var(--accent)}
   }
 
   // ---- actions ----
+  // Habitify の習慣「毎日クイズをやる」に、回答1問ごとに 1 rep を記録する（習慣側の目標が N なら N 問で達成）。
+  // 二重計上を避けるため自動リトライはしない。失敗しても回答の記録には影響しない。
+  const HABITIFY = { server: 'Habitify MCP', habitId: '-P5vNISNlgX1gjnZS5vC' };
+  async function logHabit(info) {
+    if (!S.mcp) return;
+    try {
+      await S.mcp.callTool(HABITIFY.server, 'add-habit-log', { habitId: HABITIFY.habitId, value: 1, unit: 'rep', date: TODAY });
+      info.habit = 'ok';
+    } catch (e) { info.habit = 'fail'; }
+    if (S.tab === 'today' && S.info === info) renderToday();
+  }
   async function answer(idx) {
     const q = S.current; if (!q || S.info) return;
     const correct = idx === q.answer;
@@ -399,6 +415,7 @@ footer a{color:var(--accent)}
     S.info = { idx, correct, rating, prev, sched: schedule(prev, rating), ref: null };
     S.doneIds.add(q.id);
     renderToday();
+    logHabit(S.info);
     try {
       const ref = S.db.collection('answers').doc();
       await ref.set({ qid: q.id, theme: q.theme || '', prompt: q.prompt, choice: q.choices[idx], correctChoice: q.choices[q.answer], correct, rating, answeredAt: new Date().toISOString(), date: TODAY });
@@ -580,6 +597,7 @@ ${info && info.idx >= 0 ? `彼の回答: ${KEYS[info.idx]}. ${q.choices[info.idx
       claude.use('sample').catch(() => null),
     ]);
     S.db = db; S.sample = sample;
+    claude.use('mcp').then(m => { S.mcp = m; }).catch(() => {});
     if (!db) { render(); return; }
     const timer = setTimeout(() => { S.slow = true; refresh(); }, 10000);
     const fail = err => { S.dbError = err; clearTimeout(timer); S.slow = true; S.dueLoaded = S.answersLoaded = true; refresh(); };
