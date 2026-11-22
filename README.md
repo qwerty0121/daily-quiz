@@ -20,7 +20,7 @@ Habitify で毎日の通知と習慣チェック
 | 部品 | 場所 |
 |---|---|
 | クイズページ | https://claude.ai/artifact/JH2Rrt5K9W5unXMnRcYrF4 （ソース: `app/index.html`） |
-| 朝の準備タスク | claude.ai の定期実行タスク `trig_01BkEYjwhDajd2aKv6Fx6nX4`（指示: `routines/morning-prep.md`） |
+| 朝の準備タスク | claude.ai のルーティン（指示本文: `routines/morning-prep.md`、ルーティン側の設定: `routines/morning-prep.trigger.md`） |
 | テーマ管理 | Notion「学習テーマデータベース」（`docs/notion-schema.md`） |
 | 通知・習慣管理 | Habitify（Todoist は使わない） |
 
@@ -38,6 +38,7 @@ Habitify で毎日の通知と習慣チェック
 
 ## 運用メモ
 
-- 朝の準備タスク（ルーティン）にはリポジトリを紐付けられず、カスタム指示を直接持つ。`routines/morning-prep.md` の本文（先頭のコメントを除く）が指示の正だが、main を更新しても自動では反映されない。指示を変えたら、main に反映したうえで、ルーティンのカスタム指示にも同じ本文を手動で貼り替えること。スケジュール・モデル・コネクタもタスク側の設定なので、変えたら `routines/morning-prep.md` 先頭のメモを更新すること。
+- 朝の準備タスクの指示本文は、main ブランチの `routines/morning-prep.md` が正。ルーティンは毎回これを読んで実行するので、main を更新するだけで次回から反映される。
+- ルーティンに直接設定するカスタム指示（本文を読ませるだけの短い指示）と、スケジュール・モデル・コネクタなどの設定は `routines/morning-prep.trigger.md` に記録している。こちらはルーティン側の設定を変えたときに、手動で更新すること（自動では同期されない）。
 - クイズページ（`app/index.html`）は記録用のコピーで、変更しても本番には自動反映されない。ページを直したらアーティファクトを再公開すること（逆に、本番を直したらここにも反映する）。
 - 以前あった昼の再通知タスク（12:13 JST、Todoist のタスク完了・再設定）は、通知を Habitify に移した際に廃止済み。
