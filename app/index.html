@@ -180,7 +180,7 @@ footer a{color:var(--accent)}
     gen: { busy: false, error: null },
     chats: {}, chatBusy: false, chatCtl: null,
     range: 7, expanded: null, qcache: {},
-    mcp: null, habitDone: false, habitBusy: false,
+    mcp: null,
   };
 
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -394,28 +394,26 @@ footer a{color:var(--accent)}
   }
 
   // ---- actions ----
-  // Habitify の習慣「毎日クイズをやる」を完了にする（その日の最初の回答時。失敗しても回答の記録には影響しない）
+  // Habitify の習慣「毎日クイズをやる」に、回答1問ごとに 1 rep を記録する（習慣側の目標が N なら N 問で達成）。
+  // 二重計上を避けるため自動リトライはしない。失敗しても回答の記録には影響しない。
   const HABITIFY = { server: 'Habitify MCP', habitId: '-P5vNISNlgX1gjnZS5vC' };
-  async function syncHabit() {
-    if (!S.mcp || S.habitDone || S.habitBusy) return;
-    S.habitBusy = true;
+  async function logHabit(info) {
+    if (!S.mcp) return;
     try {
-      await S.mcp.callTool(HABITIFY.server, 'complete-habit', { habitId: HABITIFY.habitId, date: TODAY });
-      S.habitDone = true;
-      if (S.info) S.info.habit = 'ok';
-    } catch (e) { if (S.info) S.info.habit = 'fail'; }
-    S.habitBusy = false;
-    if (S.tab === 'today' && S.info) renderToday();
+      await S.mcp.callTool(HABITIFY.server, 'add-habit-log', { habitId: HABITIFY.habitId, value: 1, unit: 'rep', date: TODAY });
+      info.habit = 'ok';
+    } catch (e) { info.habit = 'fail'; }
+    if (S.tab === 'today' && S.info === info) renderToday();
   }
   async function answer(idx) {
     const q = S.current; if (!q || S.info) return;
-    if (!S.answers.some(a => a.date === TODAY)) syncHabit(); else S.habitDone = true;
     const correct = idx === q.answer;
     const rating = correct ? 'sure' : 'wrong';
     const prev = { interval: q.interval || 0, reps: q.reps || 0, lapses: q.lapses || 0 };
     S.info = { idx, correct, rating, prev, sched: schedule(prev, rating), ref: null };
     S.doneIds.add(q.id);
     renderToday();
+    logHabit(S.info);
     try {
       const ref = S.db.collection('answers').doc();
       await ref.set({ qid: q.id, theme: q.theme || '', prompt: q.prompt, choice: q.choices[idx], correctChoice: q.choices[q.answer], correct, rating, answeredAt: new Date().toISOString(), date: TODAY });

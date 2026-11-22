@@ -15,7 +15,7 @@ Notion 学習テーマDB ──(毎朝同期)──┐
   回答・自信の記録・AIへの質問・履歴
                                     ▲
 Habitify で毎日の通知と習慣チェック
-   （その日の最初の回答時に、ページから習慣「毎日クイズをやる」を完了にする）
+   （回答1問ごとに、ページから習慣「毎日クイズをやる」へ 1 rep を記録する（習慣側の目標が N なら N 問で達成））
 ```
 
 | 部品 | 場所 |
@@ -23,7 +23,7 @@ Habitify で毎日の通知と習慣チェック
 | クイズページ | https://claude.ai/artifact/JH2Rrt5K9W5unXMnRcYrF4 （ソース: `app/index.html`） |
 | 朝の準備タスク | claude.ai の定期実行タスク `trig_01BkEYjwhDajd2aKv6Fx6nX4`（指示: `routines/morning-prep.md`） |
 | テーマ管理 | Notion「学習テーマデータベース」（`docs/notion-schema.md`） |
-| 通知・習慣管理 | Habitify（Todoist は使わない）。ページが `mcp` 機能で Habitify MCP の `complete-habit` を呼ぶ（習慣ID `-P5vNISNlgX1gjnZS5vC`） |
+| 通知・習慣管理 | Habitify（Todoist は使わない）。ページが `mcp` 機能で Habitify MCP の `add-habit-log` を呼ぶ（習慣ID `-P5vNISNlgX1gjnZS5vC`） |
 
 ## ディレクトリ
 
